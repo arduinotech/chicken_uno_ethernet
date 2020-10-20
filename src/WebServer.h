@@ -4,13 +4,7 @@
 #include <Arduino.h>
 #include <Ethernet.h>
 
-struct Response {
-    bool html;
-    String content;
-};
-
-typedef Response (*ProcessorFunctionType)(String);
-
+typedef String (*ProcessorFunctionType)(String);
 
 class WebServer
 {
@@ -21,9 +15,9 @@ class WebServer
 
     private:
         EthernetServer *_server;
-        String _request;
         ProcessorFunctionType _processorFunction;
         String parseUrlFromRequest();
+        String _request;
 };
 
 #endif
