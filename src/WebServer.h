@@ -18,6 +18,7 @@ class WebServer
         ProcessorFunctionType _processorFunction;
         String parseUrlFromRequest();
         String _request;
+        String _url;
 };
 
 #endif

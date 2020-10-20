@@ -7,6 +7,8 @@
 #include "hardware/Lamp.h"
 #include "hardware/Clock.h"
 
+#include "MemoryFree.h"
+
 WebServer webServer(PORT);
 SensorDHT22 dht(DHT22_PIN);
 Lamp lamp(LAMP_PIN);
@@ -14,6 +16,10 @@ Clock clock;
 
 String processor(String url)
 {
+    Serial.println("processor begin");
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
+
     Serial.print("Request: ");
     Serial.println(url);
 
@@ -29,10 +35,27 @@ String processor(String url)
 <p>Температура:%TEMP%</p>
 </body>
 </html>)rawliteral");
-        Serial.println("222");
-        Serial.println(html);
-        //html.replace("%TEMP%", String(dht.getTemp()));
-        Serial.println(html);
+
+//         String html = String(R"rawliteral(<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8">
+//     <title>Chicken</title>
+// </head>
+// <body>
+// <p>Temperature:%TEMP%</p>
+// </body>
+// </html>)rawliteral");
+// String html = String("<p>Temperature:%TEMP%</p>");
+        // Serial.println("222");
+        // Serial.println(html);
+        // Serial.println("333");
+        // Serial.println("444");
+        String from = String("%TEMP%");
+        String to = String(dht.getTemp());
+        html.replace(from, to);
+        // Serial.println("555");
+        // Serial.println(html);
         return html;
     }
 
@@ -65,15 +88,45 @@ void setup()
 {
     Serial.begin(115200);
 
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
+
+
+
+
+//     String html = String(R"rawliteral(<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8">
+//     <title>Курятник</title>
+// </head>
+// <body>
+// <p>Температура:%TEMP%</p>
+// </body>
+// </html>)rawliteral");
+//     Serial.println("222");
+//     Serial.println(html);
+//     html.replace("%TEMP%", String(dht.getTemp()));
+//     Serial.println(html);
+
+
+
+
     // hardware
     dht.init();
     lamp.init();
     clock.init();
 
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
+
     // network
     byte mac[] = MAC;
     byte ip[] = IP;
     webServer.init(mac, ip, processor);
+
+    Serial.print("freeMemory()=");
+    Serial.println(freeMemory());
 }
 
 void loop()
