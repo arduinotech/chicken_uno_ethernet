@@ -5,15 +5,14 @@ WebServer::WebServer(uint16_t port)
     _server = new EthernetServer(port);
 }
 
-void WebServer::init(uint8_t *mac_address, IPAddress local_ip)
+void WebServer::init(uint8_t *mac_address, IPAddress local_ip, ProcessorFunctionType processorFunction)
 {
     Ethernet.begin(mac_address, local_ip);
     _server->begin();
-    Serial.print("server is at ");
-    Serial.println(Ethernet.localIP());
+    _processorFunction = processorFunction;
 }
 
-void WebServer::isRequest()
+void WebServer::listening()
 {
     // слушаем порт, ждем запросов
     EthernetClient client = _server->available();
@@ -30,20 +29,25 @@ void WebServer::isRequest()
                 if (c == '\n' && currentLineIsBlank) {
                     // send a standard http response header
 
-                    if (_request.indexOf("GET /favicon.ico") != -1) {
-                        Serial.println("Is favicon request - break!");
-                        client.println("HTTP/1.1 404 OK");
-                        client.println("Connection: close");
-                        break;
+                    Response response;
+                    String url = parseUrlFromRequest();
+                    if (String("") == url) {
+                        response = {false, ""};
+                    } else {
+                        response = _processorFunction(url);
                     }
                     client.println("HTTP/1.1 200 OK");
                     client.println("Content-Type: text/html");
                     client.println("Connection: close"); // соединение будет закрыто после получения клиентом ответа
                     client.println();
-                    client.println("<!DOCTYPE HTML>");
-                    client.println("<html>");
-                    client.println(_request);
-                    client.println("</html>");
+                    if (response.html) {
+                        client.println("<!DOCTYPE HTML>");
+                        client.println("<html>");
+                    }
+                    client.println(response.content);
+                    if (response.html) {
+                        client.println("</html>");
+                    }
                     break;
                 }
                 if (c == '\n') {
@@ -61,4 +65,17 @@ void WebServer::isRequest()
         // после чего закроем соединение
         client.stop();
     }
+}
+
+String WebServer::parseUrlFromRequest()
+{
+    int posGet = _request.indexOf("GET ");
+    if (-1 == posGet) {
+        return "";
+    }
+    int posSpace = _request.indexOf(" ", posGet + 4);
+    if (-1 == posSpace) {
+        return "";
+    }
+    return _request.substring(posGet + 4, posSpace);
 }
