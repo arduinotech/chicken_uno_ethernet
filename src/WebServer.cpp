@@ -1,7 +1,9 @@
 #include "WebServer.h"
 #include "MemoryFree.h"
+#include <RTClib.h>
+#include "hardware/Clock.h"
 
-#define DEBUG_MEM(text) Serial.print("freeMemory() = "); Serial.print(freeMemory()); Serial.print(" - "); Serial.println(text);
+#define DEBUG_MEM(text) Serial.print(F("freeMemory() = ")); Serial.print(freeMemory()); Serial.print(F(" - ")); Serial.println(text);
 
 WebServer::WebServer(uint16_t port)
 {
@@ -12,11 +14,9 @@ WebServer::WebServer(uint16_t port)
 
 void WebServer::init(uint8_t *mac_address, IPAddress local_ip, ProcessorFunctionType processorFunction)
 {
-    Serial.println("Initing webServer...");
     Ethernet.begin(mac_address, local_ip);
     _server->begin();
     _processorFunction = processorFunction;
-    Serial.println("OK");
 }
 
 void WebServer::listening()
@@ -36,7 +36,7 @@ void WebServer::listening()
                     _request = "";
                 }
                 if (c == '\n' && currentLineIsBlank) {
-                    DEBUG_MEM("listening() before return html")
+                    DEBUG_MEM(F("listening() before return html"))
 
                     if (_url == String("")) {
                         return;
@@ -73,18 +73,55 @@ void WebServer::listening()
                     client.println(F("</p>"));
                     client.println(F("    <p>"));
                     client.println(F("        <form>"));
-                    client.println(F("            Время включения: <input type=\"text\" name=\"time_lamp_on_1\"></br></br>"));
-                    client.println(F("            Время выключения: <input type=\"text\" name=\"time_lamp_off_1\"></br></br>"));
-                    client.println(F("            Время включения доп: <input type=\"text\" name=\"time_lamp_on_2\"></br></br>"));
-                    client.println(F("            Время выключения доп: <input type=\"text\" name=\"time_lamp_off_2\"></br></br>"));
-                    client.println(F("            Температура включения: <input type=\"text\" name=\"temp_to_on\"></br></br>"));
-                    client.println(F("            <input type=\"submit\" name=\"save\"></br></br>"));
-                    client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"manual_control\">"));
+                    if (htmlParams.manual) {
+                        client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"m\" checked></br></br>"));
+                        if (htmlParams.lamp) {
+                            client.println(F("            Лампа: <input type=\"checkbox\" name=\"l\" checked></br></br>"));
+                        } else {
+                            client.println(F("            Лампа: <input type=\"checkbox\" name=\"l\"></br></br>"));
+                        }
+
+                    } else {
+                        client.print(F("            Время включения: <input type=\"text\" name=\"n\" value=\""));
+                        client.print(htmlParams.timeToOn1);
+                        client.println(F("\"></br></br>"));
+                        client.println(F("            Время выключения: <input type=\"text\" name=\"f\" value=\""));
+                        client.print(htmlParams.timeToOff1);
+                        client.println(F("\"></br></br>"));
+                        client.println(F("            Время включения доп: <input type=\"text\" name=\"o\" value=\""));
+                        client.print(htmlParams.timeToOn2);
+                        client.println(F("\"></br></br>"));
+                        client.println(F("            Время выключения доп: <input type=\"text\" name=\"g\" value=\""));
+                        client.print(htmlParams.timeToOff2);
+                        client.println(F("\"></br></br>"));
+                        client.println(F("            Температура включения: <input type=\"text\" name=\"t\" value=\""));
+                        client.print(htmlParams.tempToOn);
+                        client.println(F("\"></br></br>"));
+                        client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"m\"></br></br>"));
+                    }
+                    client.println(F("            <input type=\"submit\" name=\"s\" value=\"1\">"));
                     client.println(F("        </form>"));
                     client.println(F("    </p>"));
+                    client.println(F("    <p>История:</p>"));
+
+                    for (uint8_t i = 0; i < htmlParams.logEventsCount; i++) {
+                        client.print(F("    <p>"));
+                        client.print(Clock::UnixTimeToString(htmlParams.logEvents[i].unixtime));
+                        client.print(F("&nbsp;&nbsp;&nbsp;&nbsp;"));
+                        client.print(htmlParams.logEvents[i].temp);
+                        client.print(F("&deg;C&nbsp;&nbsp;&nbsp;&nbsp;"));
+                        client.print(htmlParams.logEvents[i].humi);
+                        client.print(F("%&nbsp;&nbsp;&nbsp;&nbsp;"));
+                        if (htmlParams.logEvents[i].lamp) {
+                            client.println(F("вкл</p>"));
+                        } else {
+                            client.println(F("выкл</p>"));
+                        }
+                    }
+
                     client.println(F("</body>"));
                     client.println(F("</html>"));
-                    DEBUG_MEM("listening() after return html")
+                    DEBUG_MEM(F("listening() after return html"))
 
                     break;
                 }
@@ -104,11 +141,11 @@ void WebServer::listening()
 
 String WebServer::parseUrlFromRequest()
 {
-    int posGet = _request.indexOf("GET ");
+    int posGet = _request.indexOf(F("GET "));
     if (-1 == posGet) {
         return String("");
     }
-    int posSpace = _request.indexOf(" ", posGet + 4);
+    int posSpace = _request.indexOf(F(" "), posGet + 4);
     if (-1 == posSpace) {
         return String("");
     }

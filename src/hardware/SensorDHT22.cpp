@@ -8,14 +8,9 @@ SensorDHT22::SensorDHT22(uint8_t pin)
 
 void SensorDHT22::init()
 {
-    Serial.println("Initing dht22...");
     pinMode(_pin, INPUT);
     _dht = new DHT(_pin, DHT22);
     _dht->begin();
-    Serial.print("OK, temp = ");
-    Serial.print(getTemp());
-    Serial.print(", humi = ");
-    Serial.println(getHumi());
 }
 
 int8_t SensorDHT22::getTemp()

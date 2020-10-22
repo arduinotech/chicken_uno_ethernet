@@ -6,27 +6,38 @@ Clock::Clock()
 
 void Clock::init()
 {
-    Serial.println("Initing clock...");
     _rtc.begin();
     if (!_rtc.isrunning()) {
-        Serial.println("RTC is NOT running!");
-        Serial.print("Set date: ");
+        Serial.println(F("RTC is NOT running!"));
+        Serial.print(F("Set date: "));
         Serial.println(__DATE__);
-        Serial.print("Set time: ");
+        Serial.print(F("Set time: "));
         Serial.println(__TIME__);
         _rtc.adjust(DateTime(__DATE__, __TIME__));
-    } else {
-        Serial.println("Clock ok");
-        Serial.println(getCurrentDateTime());
     }
 }
 
 String Clock::getCurrentDateTime()
 {
-  DateTime now = _rtc.now();
-  return (now.hour() < 10 ? String("0") : String("")) + String(now.hour()) + String(":")
-         + (now.minute() < 10 ? String("0") : String("")) + String(now.minute()) + String(" ")
-         + String(now.year()) + String("-")
-         + (now.month() < 10 ? String("0") : String("")) + String(now.month()) + String("-")
-         + (now.day() < 10 ? String("0") : String("")) + String(now.day());
+    DateTime now = _rtc.now();
+    return DateTimeToString(now);
+}
+
+uint32_t Clock::getCurrentUnixtime()
+{
+    return _rtc.now().unixtime();
+}
+
+String Clock::UnixTimeToString(uint32_t unixtime)
+{
+    return DateTimeToString(DateTime(unixtime));
+}
+
+String Clock::DateTimeToString(DateTime dateTime)
+{
+    return (dateTime.hour() < 10 ? String("0") : String("")) + String(dateTime.hour()) + String(":")
+            + (dateTime.minute() < 10 ? String("0") : String("")) + String(dateTime.minute()) + String(" ")
+            + String(dateTime.year()) + String("-")
+            + (dateTime.month() < 10 ? String("0") : String("")) + String(dateTime.month()) + String("-")
+            + (dateTime.day() < 10 ? String("0") : String("")) + String(dateTime.day());
 }
