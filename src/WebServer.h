@@ -4,7 +4,14 @@
 #include <Arduino.h>
 #include <Ethernet.h>
 
-typedef String (*ProcessorFunctionType)(String);
+struct HtmlParams {
+    String time;
+    int8_t temp;
+    int8_t humi;
+    bool lamp;
+};
+
+typedef HtmlParams (*ProcessorFunctionType)(String);
 
 class WebServer
 {
