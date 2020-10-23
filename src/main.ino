@@ -138,6 +138,8 @@ HtmlParams processor(String url)
         settingsStorage.setTempToOn(StringParser::parseTemp(pos, url));
     }
 
+    lampOnOrOffIfNeed();
+
     DEBUG_MEM(F("processor end"))
     return {clock.getCurrentDateTime(),
             dht.getTemp(),
