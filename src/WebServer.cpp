@@ -52,6 +52,7 @@ void WebServer::listening()
                     client.println(F("<html lang=\"en\">"));
                     client.println(F("<head>"));
                     client.println(F("    <meta charset=\"UTF-8\">"));
+                    client.println(F("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"));
                     client.println(F("    <title>Курятник</title>"));
                     client.println(F("</head>"));
                     client.println(F("<body>"));
@@ -82,19 +83,19 @@ void WebServer::listening()
                         }
 
                     } else {
-                        client.print(F("            Время включения: <input type=\"text\" name=\"n\" value=\""));
+                        client.print(F("            Время включения:</br><input type=\"text\" name=\"n\" value=\""));
                         client.print(htmlParams.timeToOn1);
                         client.println(F("\"></br></br>"));
-                        client.println(F("            Время выключения: <input type=\"text\" name=\"f\" value=\""));
+                        client.println(F("            Время выключения:</br><input type=\"text\" name=\"f\" value=\""));
                         client.print(htmlParams.timeToOff1);
                         client.println(F("\"></br></br>"));
-                        client.println(F("            Время включения доп: <input type=\"text\" name=\"o\" value=\""));
+                        client.println(F("            Время включения доп:</br><input type=\"text\" name=\"o\" value=\""));
                         client.print(htmlParams.timeToOn2);
                         client.println(F("\"></br></br>"));
-                        client.println(F("            Время выключения доп: <input type=\"text\" name=\"g\" value=\""));
+                        client.println(F("            Время выключения доп:</br><input type=\"text\" name=\"g\" value=\""));
                         client.print(htmlParams.timeToOff2);
                         client.println(F("\"></br></br>"));
-                        client.println(F("            Температура включения: <input type=\"text\" name=\"t\" value=\""));
+                        client.println(F("            Температура включения:</br><input type=\"text\" name=\"t\" value=\""));
                         client.print(htmlParams.tempToOn);
                         client.println(F("\"></br></br>"));
                         client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"m\"></br></br>"));
