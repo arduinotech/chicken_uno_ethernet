@@ -11,6 +11,7 @@ class Clock
         String getCurrentDateTime();
         uint16_t getCurrentTimeInMinutes();
         uint32_t getCurrentUnixtime();
+        uint8_t getCurrentHour();
         static String unixTimeToString(uint32_t unixtime);
         static uint16_t stringTimeToMinutes(String time);
 

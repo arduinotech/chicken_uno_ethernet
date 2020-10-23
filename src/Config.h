@@ -11,6 +11,7 @@
 #define DHT22_PIN 9
 
 // settings
-#define LAMP_CHECK_INTERVAL 1000
+#define CHECK_INTERVAL 1000
+#define LOG_SIZE 12
 
 #endif

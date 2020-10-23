@@ -21,7 +21,7 @@ Lamp lamp(LAMP_PIN);
 Clock clock;
 SettingsStorage settingsStorage;
 
-LogEvent logEvents[12];
+LogEvent logEvents[LOG_SIZE];
 uint8_t logEventsCount = 0;
 
 void lampOnOrOffIfNeed()
@@ -177,14 +177,6 @@ void setup()
     byte ip[] = IP;
     webServer.init(mac, ip, processor);
 
-    logEvents[0] = {clock.getCurrentUnixtime(), 6, 79, true};
-    logEventsCount++;
-
-    logEvents[1] = {clock.getCurrentUnixtime(), 7, 77, true};
-    logEventsCount++;
-
-    logEvents[2] = {clock.getCurrentUnixtime(), 12, 61, false};
-    logEventsCount++;
     DEBUG_MEM(F("setup end"))
 }
 
@@ -192,13 +184,27 @@ void loop()
 {
     uint32_t now = millis();
     static uint32_t lampOnOffIfNeedLastCall = 0;
+    static uint8_t lastHourSaveData = 1;
 
     if (lampOnOffIfNeedLastCall > now) {
         lampOnOffIfNeedLastCall = 0;
     }
 
-    if ((now - lampOnOffIfNeedLastCall) > LAMP_CHECK_INTERVAL) {
+    if ((now - lampOnOffIfNeedLastCall) > CHECK_INTERVAL) {
         lampOnOrOffIfNeed();
+        uint8_t hour = clock.getCurrentHour();
+        if ((hour % 2 == 0) && (hour != lastHourSaveData)) {
+            LogEvent newEvent = {clock.getCurrentUnixtime(), dht.getTemp(), dht.getHumi(), lamp.isOn()};
+            if (logEventsCount < LOG_SIZE) {
+                logEvents[logEventsCount] = newEvent;
+                logEventsCount++;
+            } else {
+                for (int i = 0; i < LOG_SIZE - 1; i++) {
+                    logEvents[i] = logEvents[i + 1];
+                }
+                logEvents[LOG_SIZE - 1] = newEvent;
+            }
+        }
     }
 
     webServer.listening();
