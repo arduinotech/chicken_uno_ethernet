@@ -20,7 +20,13 @@ void Clock::init()
 String Clock::getCurrentDateTime()
 {
     DateTime now = _rtc.now();
-    return DateTimeToString(now);
+    return dateTimeToString(now);
+}
+
+uint16_t Clock::getCurrentTimeInMinutes()
+{
+    DateTime now = _rtc.now();
+    return now.hour() * 60 + now.minute();
 }
 
 uint32_t Clock::getCurrentUnixtime()
@@ -28,12 +34,17 @@ uint32_t Clock::getCurrentUnixtime()
     return _rtc.now().unixtime();
 }
 
-String Clock::UnixTimeToString(uint32_t unixtime)
+String Clock::unixTimeToString(uint32_t unixtime)
 {
-    return DateTimeToString(DateTime(unixtime));
+    return dateTimeToString(DateTime(unixtime));
 }
 
-String Clock::DateTimeToString(DateTime dateTime)
+uint16_t Clock::stringTimeToMinutes(String time)
+{
+    return time.substring(0, 2).toInt() * 60 + time.substring(3, 5).toInt();
+}
+
+String Clock::dateTimeToString(DateTime dateTime)
 {
     return (dateTime.hour() < 10 ? String("0") : String("")) + String(dateTime.hour()) + String(":")
             + (dateTime.minute() < 10 ? String("0") : String("")) + String(dateTime.minute()) + String(" ")

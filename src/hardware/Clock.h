@@ -9,12 +9,14 @@ class Clock
         Clock();
         void init();
         String getCurrentDateTime();
+        uint16_t getCurrentTimeInMinutes();
         uint32_t getCurrentUnixtime();
-        static String UnixTimeToString(uint32_t unixtime);
+        static String unixTimeToString(uint32_t unixtime);
+        static uint16_t stringTimeToMinutes(String time);
 
     private:
         RTC_DS1307 _rtc;
-        static String DateTimeToString(DateTime dateTime);
+        static String dateTimeToString(DateTime dateTime);
 };
 
 #endif

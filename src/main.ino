@@ -19,16 +19,56 @@ WebServer webServer(PORT);
 SensorDHT22 dht(DHT22_PIN);
 Lamp lamp(LAMP_PIN);
 Clock clock;
+SettingsStorage settingsStorage;
 
 LogEvent logEvents[12];
 uint8_t logEventsCount = 0;
 
-bool manual = false;
-String timeToOn1 = "06:00";
-String timeToOff1 = "10:00";
-String timeToOn2 = "18:00";
-String timeToOff2 = "20:00";
-String tempToOn = "6";
+void lampOnOrOffIfNeed()
+{
+    if (settingsStorage.getManual()) {
+        if (settingsStorage.getLamp() && !lamp.isOn()) {
+            lamp.on();
+        } else if (!settingsStorage.getLamp() && lamp.isOn()) {
+            lamp.off();
+        }
+        return;
+    }
+
+    if ((settingsStorage.getTempToOn() != String("")) && (dht.getTemp() > settingsStorage.getTempToOn().toInt())) {
+        if (lamp.isOn()) {
+            lamp.off();
+        }
+        return;
+    }
+
+    uint16_t currentTime = clock.getCurrentTimeInMinutes();
+    if ((settingsStorage.getTimeToOn1() != String("")) && (settingsStorage.getTimeToOff1() != String(""))) {
+        uint16_t timeToOn = Clock::stringTimeToMinutes(settingsStorage.getTimeToOn1());
+        uint16_t timeToOff = Clock::stringTimeToMinutes(settingsStorage.getTimeToOff1());
+        if ((timeToOn <= currentTime) && (currentTime < timeToOff)) {
+            if (!lamp.isOn()) {
+                lamp.on();
+            }
+            return;
+        }
+    }
+
+    if ((settingsStorage.getTimeToOn2() != String("")) && (settingsStorage.getTimeToOff2() != String(""))) {
+        uint16_t timeToOn = Clock::stringTimeToMinutes(settingsStorage.getTimeToOn2());
+        uint16_t timeToOff = Clock::stringTimeToMinutes(settingsStorage.getTimeToOff2());
+        if ((timeToOn <= currentTime) && (currentTime < timeToOff)) {
+            if (!lamp.isOn()) {
+                lamp.on();
+            }
+            return;
+        }
+    }
+
+    if (lamp.isOn()) {
+        lamp.off();
+    }
+}
 
 HtmlParams processor(String url)
 {
@@ -42,73 +82,60 @@ HtmlParams processor(String url)
                 dht.getTemp(),
                 dht.getHumi(),
                 lamp.isOn(),
-                manual,
-                timeToOn1,
-                timeToOff1,
-                timeToOn2,
-                timeToOff2,
-                tempToOn,
+                settingsStorage.getManual(),
+                settingsStorage.getTimeToOn1(),
+                settingsStorage.getTimeToOff1(),
+                settingsStorage.getTimeToOn2(),
+                settingsStorage.getTimeToOff2(),
+                settingsStorage.getTempToOn(),
                 logEvents,
                 logEventsCount};
     }
 
-    if (!manual && (url.indexOf(F("m=on")) != -1)) {
-        manual = true;
+    if (!settingsStorage.getManual() && (url.indexOf(F("m=on")) != -1)) {
+        settingsStorage.setManual(true);
     }
 
-    if (manual && (url.indexOf(F("m=on")) == -1)) {
-        manual = false;
-        // TODO тут лампу зажечь или потушить - по логике времени и температуры
+    if (settingsStorage.getManual() && (url.indexOf(F("m=on")) == -1) && (url.indexOf(F("s=")) != -1)) {
+        settingsStorage.setManual(false);
+        settingsStorage.setLamp(false);
     }
 
-    if (manual && !lamp.isOn() && (url.indexOf(F("l=on")) != -1)) {
+    if (settingsStorage.getManual() && !lamp.isOn() && (url.indexOf(F("l=on")) != -1)) {
         lamp.on();
+        settingsStorage.setLamp(true);
     }
 
-    if (manual && (url.indexOf(F("m=on")) != -1) && (url.indexOf(F("l=on")) == -1) && (url.indexOf(F("f=")) == -1)) {
+    if (settingsStorage.getManual() && (url.indexOf(F("m=on")) != -1) && (url.indexOf(F("l=on")) == -1) && (url.indexOf(F("f=")) == -1)) {
         lamp.off();
+        settingsStorage.setLamp(false);
     }
 
     int pos;
 
     pos = url.indexOf(F("n="));
     if (pos != -1) {
-        String newTimeToOn1 = StringParser::parseTime(pos, url);
-        if (newTimeToOn1 != timeToOn1) {
-            timeToOn1 = newTimeToOn1;
-        }
+        settingsStorage.setTimeToOn1(StringParser::parseTime(pos, url));
     }
 
     pos = url.indexOf(F("f="));
     if (pos != -1) {
-        String newTimeToOff1 = StringParser::parseTime(pos, url);
-        if (newTimeToOff1 != timeToOff1) {
-            timeToOff1 = newTimeToOff1;
-        }
+        settingsStorage.setTimeToOff1(StringParser::parseTime(pos, url));
     }
 
     pos = url.indexOf(F("o="));
     if (pos != -1) {
-        String newTimeToOn2 = StringParser::parseTime(pos, url);
-        if (newTimeToOn2 != timeToOn2) {
-            timeToOn2 = newTimeToOn2;
-        }
+        settingsStorage.setTimeToOn2(StringParser::parseTime(pos, url));
     }
 
     pos = url.indexOf(F("g="));
     if (pos != -1) {
-        String newTimeToOff2 = StringParser::parseTime(pos, url);
-        if (newTimeToOff2 != timeToOff2) {
-            timeToOff2 = newTimeToOff2;
-        }
+        settingsStorage.setTimeToOff2(StringParser::parseTime(pos, url));
     }
 
     pos = url.indexOf(F("t="));
     if (pos != -1) {
-        String newTempToOn = StringParser::parseTemp(pos, url);
-        if (newTempToOn != tempToOn) {
-            tempToOn = newTempToOn;
-        }
+        settingsStorage.setTempToOn(StringParser::parseTemp(pos, url));
     }
 
     DEBUG_MEM(F("processor end"))
@@ -116,12 +143,12 @@ HtmlParams processor(String url)
             dht.getTemp(),
             dht.getHumi(),
             lamp.isOn(),
-            manual,
-            timeToOn1,
-            timeToOff1,
-            timeToOn2,
-            timeToOff2,
-            tempToOn,
+            settingsStorage.getManual(),
+            settingsStorage.getTimeToOn1(),
+            settingsStorage.getTimeToOff1(),
+            settingsStorage.getTimeToOn2(),
+            settingsStorage.getTimeToOff2(),
+            settingsStorage.getTempToOn(),
             logEvents,
             logEventsCount};
 }
@@ -136,6 +163,12 @@ void setup()
     dht.init();
     lamp.init();
     clock.init();
+
+    settingsStorage.init();
+
+    if (settingsStorage.getManual() && settingsStorage.getLamp()) {
+        lamp.on();
+    }
 
     DEBUG_MEM(F("setup hardware inited"))
 
@@ -157,5 +190,16 @@ void setup()
 
 void loop()
 {
+    uint32_t now = millis();
+    static uint32_t lampOnOffIfNeedLastCall = 0;
+
+    if (lampOnOffIfNeedLastCall > now) {
+        lampOnOffIfNeedLastCall = 0;
+    }
+
+    if ((now - lampOnOffIfNeedLastCall) > LAMP_CHECK_INTERVAL) {
+        lampOnOrOffIfNeed();
+    }
+
     webServer.listening();
 }

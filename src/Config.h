@@ -10,4 +10,7 @@
 #define LAMP_PIN 8
 #define DHT22_PIN 9
 
+// settings
+#define LAMP_CHECK_INTERVAL 1000
+
 #endif

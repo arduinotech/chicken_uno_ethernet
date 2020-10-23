@@ -81,7 +81,6 @@ void WebServer::listening()
                         } else {
                             client.println(F("            Лампа: <input type=\"checkbox\" name=\"l\"></br></br>"));
                         }
-
                     } else {
                         client.print(F("            Время включения:</br><input type=\"text\" name=\"n\" value=\""));
                         client.print(htmlParams.timeToOn1);
@@ -99,6 +98,7 @@ void WebServer::listening()
                         client.print(htmlParams.tempToOn);
                         client.println(F("\"></br></br>"));
                         client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"m\"></br></br>"));
+
                     }
                     client.println(F("            <input type=\"submit\" name=\"s\" value=\"1\">"));
                     client.println(F("        </form>"));
@@ -107,7 +107,7 @@ void WebServer::listening()
 
                     for (uint8_t i = 0; i < htmlParams.logEventsCount; i++) {
                         client.print(F("    <p>"));
-                        client.print(Clock::UnixTimeToString(htmlParams.logEvents[i].unixtime));
+                        client.print(Clock::unixTimeToString(htmlParams.logEvents[i].unixtime));
                         client.print(F("&nbsp;&nbsp;&nbsp;&nbsp;"));
                         client.print(htmlParams.logEvents[i].temp);
                         client.print(F("&deg;C&nbsp;&nbsp;&nbsp;&nbsp;"));
