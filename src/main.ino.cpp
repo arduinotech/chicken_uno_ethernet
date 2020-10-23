@@ -1,3 +1,6 @@
+# 1 "/var/folders/t9/5gg91n5x4x196n8wd01tz68c0000gn/T/tmp4ce3tixl"
+#include <Arduino.h>
+# 1 "/Users/nixoid/Documents/PlatformIO/Projects/chicken_uno_ethernet/src/main.ino"
 #include <Arduino.h>
 #include <SPI.h>
 #include <avr/pgmspace.h>
@@ -10,7 +13,7 @@
 #include "StringParser.h"
 #include "SettingsStorage.h"
 
-// TODO remove for production
+
 #include "MemoryFree.h"
 
 #define DEBUG_MEM(text) Serial.print(F("freeMemory() = ")); Serial.print(freeMemory()); Serial.print(F(" - ")); Serial.println(text);
@@ -23,7 +26,11 @@ SettingsStorage settingsStorage;
 
 LogEvent logEvents[LOG_SIZE];
 uint8_t logEventsCount = 0;
-
+void lampOnOrOffIfNeed();
+HtmlParams processor(String url);
+void setup();
+void loop();
+#line 27 "/Users/nixoid/Documents/PlatformIO/Projects/chicken_uno_ethernet/src/main.ino"
 void lampOnOrOffIfNeed()
 {
     if (settingsStorage.getManual()) {
@@ -161,7 +168,7 @@ void setup()
 
     DEBUG_MEM(F("setup begin"))
 
-    // hardware
+
     dht.init();
     lamp.init();
     clock.init();
@@ -174,7 +181,7 @@ void setup()
 
     DEBUG_MEM(F("setup hardware inited"))
 
-    // network
+
     byte mac[] = MAC;
     byte ip[] = IP;
     webServer.init(mac, ip, processor);
