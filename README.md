@@ -1,6 +1,6 @@
 # Chicken coop controller
 
-<F3>![Chicken coop controller schema](https://raw.githubusercontent.com/arduinotech/chicken_uno_ethernet/master/schema.jpg)
+<F3>![Chicken coop controller schema](https://raw.githubusercontent.com/arduinotech/chicken_uno_ethernet/main/schema.jpg)
   
 Project page on my website: [https://arduino-technology.ru/projects/chicken-coop-controller/](https://arduino-technology.ru/projects/chicken-coop-controller/)
 
