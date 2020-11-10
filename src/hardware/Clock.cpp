@@ -7,14 +7,9 @@ Clock::Clock()
 void Clock::init()
 {
     _rtc.begin();
-    if (!_rtc.isrunning()) {
-        Serial.println(F("RTC is NOT running!"));
-        Serial.print(F("Set date: "));
-        Serial.println(__DATE__);
-        Serial.print(F("Set time: "));
-        Serial.println(__TIME__);
-        _rtc.adjust(DateTime(__DATE__, __TIME__));
-    }
+    // if (!_rtc.isrunning()) {
+    //     _rtc.adjust(DateTime(__DATE__, __TIME__));
+    // }
 }
 
 String Clock::getCurrentDateTime()
@@ -57,4 +52,17 @@ String Clock::dateTimeToString(DateTime dateTime)
             + String(dateTime.year()) + String("-")
             + (dateTime.month() < 10 ? String("0") : String("")) + String(dateTime.month()) + String("-")
             + (dateTime.day() < 10 ? String("0") : String("")) + String(dateTime.day());
+}
+
+void Clock::setCurrentDateTime(String dateTime)
+{
+    _rtc.adjust(
+        DateTime(
+            dateTime.substring(6, 10).toInt(),
+            dateTime.substring(11, 13).toInt(),
+            dateTime.substring(14, 16).toInt(),
+            dateTime.substring(0, 2).toInt(),
+            dateTime.substring(3, 5).toInt()
+        )
+    );
 }

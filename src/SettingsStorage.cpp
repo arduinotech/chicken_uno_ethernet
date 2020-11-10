@@ -27,11 +27,11 @@ void SettingsStorage::init()
     // writeTime(String("20:00"), TIME_TO_OFF_2_IDX);
     // writeTemp(String("6"), TEMP_TO_ON_IDX);
     _manual = readManual();
-    Serial.print("_manual = ");
-    Serial.println(_manual ? "true" : "false");
+    // Serial.print("_manual = ");
+    // Serial.println(_manual ? "true" : "false");
     _lamp = readLamp();
-    Serial.print("_lamp = ");
-    Serial.println(_lamp ? "true" : "false");
+    // Serial.print("_lamp = ");
+    // Serial.println(_lamp ? "true" : "false");
     _timeToOn1 = readTimeToOn1();
     _timeToOff1 = readTimeToOff1();
     _timeToOn2 = readTimeToOn2();

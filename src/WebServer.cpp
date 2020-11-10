@@ -3,8 +3,6 @@
 #include <RTClib.h>
 #include "hardware/Clock.h"
 
-#define DEBUG_MEM(text) Serial.print(F("freeMemory() = ")); Serial.print(freeMemory()); Serial.print(F(" - ")); Serial.println(text);
-
 WebServer::WebServer(uint16_t port)
 {
     _server = new EthernetServer(port);
@@ -36,8 +34,6 @@ void WebServer::listening()
                     _request = "";
                 }
                 if (c == '\n' && currentLineIsBlank) {
-                    DEBUG_MEM(F("listening() before return html"))
-
                     if (_url == String("")) {
                         return;
                     }
@@ -54,16 +50,17 @@ void WebServer::listening()
                     client.println(F("    <meta charset=\"UTF-8\">"));
                     client.println(F("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"));
                     client.println(F("    <title>Курятник</title>"));
+                    client.println(F("<script>if (window.location.search.substr(1) != \"\") window.location.href=\"/\";</script>"));
                     client.println(F("</head>"));
                     client.println(F("<body>"));
                     client.print(F("    <p>"));
                     client.print(htmlParams.time);
                     client.println(F("</p>"));
                     client.print(F("    <p>Температура: "));
-                    client.print(String(htmlParams.temp).c_str());
+                    client.print(htmlParams.temp);
                     client.println(F("&deg;C</p>"));
                     client.print(F("    <p>Влажность: "));
-                    client.print(String(htmlParams.humi).c_str());
+                    client.print(htmlParams.humi);
                     client.println(F("%</p>"));
                     client.print(F("    <p>Лампа: "));
                     if (htmlParams.lamp) {
@@ -71,6 +68,9 @@ void WebServer::listening()
                     } else {
                         client.print(F("ВЫКЛ"));
                     }
+                    client.println(F("</p>"));
+                    client.print(F("    <p>Память: "));
+                    client.print(String(freeMemory()).c_str());
                     client.println(F("</p>"));
                     client.println(F("    <p>"));
                     client.println(F("        <form>"));
@@ -97,8 +97,8 @@ void WebServer::listening()
                         client.println(F("            Температура включения:</br><input type=\"text\" name=\"t\" value=\""));
                         client.print(htmlParams.tempToOn);
                         client.println(F("\"></br></br>"));
+                        client.println(F("            Установка часов:</br><input type=\"text\" name=\"d\"></br></br>"));
                         client.println(F("            Ручное управление: <input type=\"checkbox\" name=\"m\"></br></br>"));
-
                     }
                     client.println(F("            <input type=\"submit\" name=\"s\" value=\"1\">"));
                     client.println(F("        </form>"));
@@ -114,16 +114,17 @@ void WebServer::listening()
                         client.print(htmlParams.logEvents[i].humi);
                         client.print(F("%&nbsp;&nbsp;&nbsp;&nbsp;"));
                         if (htmlParams.logEvents[i].lamp) {
-                            client.println(F("вкл</p>"));
+                            client.println(F("вкл"));
                         } else {
-                            client.println(F("выкл</p>"));
+                            client.println(F("выкл"));
                         }
+                        client.print(F("%&nbsp;&nbsp;&nbsp;&nbsp;"));
+                        client.print(htmlParams.logEvents[i].freeMemory);
+                        client.print(F("</p>"));
                     }
 
                     client.println(F("</body>"));
                     client.println(F("</html>"));
-                    DEBUG_MEM(F("listening() after return html"))
-
                     break;
                 }
                 if (c == '\n') {

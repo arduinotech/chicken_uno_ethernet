@@ -14,6 +14,7 @@ class Clock
         uint8_t getCurrentHour();
         static String unixTimeToString(uint32_t unixtime);
         static uint16_t stringTimeToMinutes(String time);
+        void setCurrentDateTime(String dateTime);
 
     private:
         RTC_DS1307 _rtc;

@@ -10,10 +10,7 @@
 #include "StringParser.h"
 #include "SettingsStorage.h"
 
-// TODO remove for production
 #include "MemoryFree.h"
-
-#define DEBUG_MEM(text) Serial.print(F("freeMemory() = ")); Serial.print(freeMemory()); Serial.print(F(" - ")); Serial.println(text);
 
 WebServer webServer(PORT);
 SensorDHT22 dht(DHT22_PIN);
@@ -72,10 +69,8 @@ void lampOnOrOffIfNeed()
 
 HtmlParams processor(String url)
 {
-    DEBUG_MEM(F("processor begin"))
-
-    Serial.print(F("Request: "));
-    Serial.println(url);
+    // Serial.print(F("Request: "));
+    // Serial.println(url);
 
     if (String(F("/")) == url) {
         return {clock.getCurrentDateTime(),
@@ -138,9 +133,16 @@ HtmlParams processor(String url)
         settingsStorage.setTempToOn(StringParser::parseTemp(pos, url));
     }
 
+    pos = url.indexOf(F("d="));
+    if (pos != -1) {
+        String newDateTime = StringParser::parseDateTime(pos, url);
+        if (newDateTime != String("")) {
+            clock.setCurrentDateTime(newDateTime);
+        }
+    }
+
     lampOnOrOffIfNeed();
 
-    DEBUG_MEM(F("processor end"))
     return {clock.getCurrentDateTime(),
             dht.getTemp(),
             dht.getHumi(),
@@ -157,9 +159,7 @@ HtmlParams processor(String url)
 
 void setup()
 {
-    Serial.begin(115200);
-
-    DEBUG_MEM(F("setup begin"))
+    // Serial.begin(115200);
 
     // hardware
     dht.init();
@@ -172,14 +172,10 @@ void setup()
         lamp.on();
     }
 
-    DEBUG_MEM(F("setup hardware inited"))
-
     // network
     byte mac[] = MAC;
     byte ip[] = IP;
     webServer.init(mac, ip, processor);
-
-    DEBUG_MEM(F("setup end"))
 }
 
 void loop()
@@ -196,7 +192,7 @@ void loop()
         lampOnOrOffIfNeed();
         uint8_t hour = clock.getCurrentHour();
         if ((hour % 2 == 0) && (hour != lastHourSaveData)) {
-            LogEvent newEvent = {clock.getCurrentUnixtime(), dht.getTemp(), dht.getHumi(), lamp.isOn()};
+            LogEvent newEvent = {clock.getCurrentUnixtime(), dht.getTemp(), dht.getHumi(), lamp.isOn(), freeMemory()};
             if (logEventsCount < LOG_SIZE) {
                 logEvents[logEventsCount] = newEvent;
                 logEventsCount++;

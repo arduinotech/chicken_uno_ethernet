@@ -9,6 +9,7 @@ struct LogEvent {
     int8_t temp;
     int8_t humi;
     bool lamp;
+    int freeMemory;
 };
 
 struct HtmlParams {

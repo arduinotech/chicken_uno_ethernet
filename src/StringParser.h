@@ -9,6 +9,7 @@ class StringParser
         static bool isNumeric(String string);
         static String parseTime(int pos, String url);
         static String parseTemp(int pos, String url);
+        static String parseDateTime(int pos, String url);
 };
 
 #endif
