@@ -9,7 +9,7 @@
 #include "hardware/Clock.h"
 #include "StringParser.h"
 #include "SettingsStorage.h"
-
+#include "GyverWDT.h"
 #include "MemoryFree.h"
 
 WebServer webServer(PORT);
@@ -33,9 +33,6 @@ void lampOnOrOffIfNeed()
     }
 
     if ((settingsStorage.getTempToOn() != String("")) && (dht.getTemp() > settingsStorage.getTempToOn().toInt())) {
-        if (lamp.isOn()) {
-            lamp.off();
-        }
         return;
     }
 
@@ -71,6 +68,12 @@ HtmlParams processor(String url)
 {
     // Serial.print(F("Request: "));
     // Serial.println(url);
+
+    if (String(F("/kill")) == url) {
+        while(true) {
+            delay(10);
+        }
+    }
 
     if (String(F("/")) == url) {
         return {clock.getCurrentDateTime(),
@@ -176,6 +179,8 @@ void setup()
     byte mac[] = MAC;
     byte ip[] = IP;
     webServer.init(mac, ip, processor);
+
+    Watchdog.enable(RESET_MODE, WDT_PRESCALER_512);
 }
 
 void loop()
@@ -207,4 +212,5 @@ void loop()
     }
 
     webServer.listening();
+    Watchdog.reset();
 }
