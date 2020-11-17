@@ -12,7 +12,7 @@ bool StringParser::isNumeric(String string)
 
 String StringParser::parseTime(int pos, String url)
 {
-    if (url.length() < pos + 9) {
+    if (url.length() < (pos + 9)) {
         return String("");
     }
 
@@ -43,7 +43,7 @@ String StringParser::parseTime(int pos, String url)
 
 String StringParser::parseTemp(int pos, String url)
 {
-    if (url.length() < pos + 3) {
+    if (url.length() < (pos + 3)) {
         return String("");
     }
 
@@ -74,7 +74,7 @@ String StringParser::parseDateTime(int pos, String url)
 {
     // d=18%3A55+2020-11-08
 
-    if (url.length() < pos + 20) {
+    if (url.length() < (pos + 20)) {
         return String("");
     }
 
