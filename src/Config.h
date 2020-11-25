@@ -11,9 +11,11 @@
 // hardware
 #define LAMP_PIN 8
 #define DHT22_PIN 9
+#define WORK_INDICATOR_PIN 5
 
 // settings
 #define CHECK_INTERVAL 1000
 #define LOG_SIZE 12
+#define WORK_INDICATOR_INTERVAL 1000
 
 #endif

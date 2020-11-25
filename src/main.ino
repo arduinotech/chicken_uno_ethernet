@@ -196,6 +196,7 @@ void setup()
     dht.init();
     lamp.init();
     clock.init();
+    pinMode(WORK_INDICATOR_PIN, OUTPUT);
 
     settingsStorage.init();
 
@@ -216,9 +217,25 @@ void loop()
     uint32_t now = millis();
     static uint32_t lampOnOffIfNeedLastCall = 0;
     static uint8_t lastHourSaveData = 1;
+    static bool workIndicatorState = true;
+    static uint32_t workIndicatorLastChangeTime = 0;
 
     if (lampOnOffIfNeedLastCall > now) {
         lampOnOffIfNeedLastCall = 0;
+    }
+
+    if (workIndicatorLastChangeTime > now) {
+        workIndicatorLastChangeTime = 0;
+    }
+
+    if (now > (workIndicatorLastChangeTime + WORK_INDICATOR_INTERVAL)) {
+        workIndicatorState = !workIndicatorState;
+        if (workIndicatorState) {
+            digitalWrite(WORK_INDICATOR_PIN, HIGH);
+        } else {
+            digitalWrite(WORK_INDICATOR_PIN, LOW);
+        }
+        workIndicatorLastChangeTime = now;
     }
 
     if ((now - lampOnOffIfNeedLastCall) > CHECK_INTERVAL) {
