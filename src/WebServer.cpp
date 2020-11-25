@@ -118,7 +118,7 @@ void WebServer::listening()
                         } else {
                             client.println(F("выкл"));
                         }
-                        client.print(F("%&nbsp;&nbsp;&nbsp;&nbsp;"));
+                        client.print(F("&nbsp;&nbsp;&nbsp;&nbsp;"));
                         client.print(htmlParams.logEvents[i].freeMemory);
                         client.print(F("</p>"));
                     }

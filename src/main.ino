@@ -59,7 +59,7 @@ void lampOnOrOffIfNeed()
 
     if ((settingsStorage.getTimeToOn1() != String(""))
         && (settingsStorage.getTimeToOff1() != String(""))
-        && (settingsStorage.getTimeToOff2() == String(""))
+        && (settingsStorage.getTimeToOn2() == String(""))
         && (settingsStorage.getTimeToOff2() == String(""))) {
         uint16_t timeToOn = Clock::stringTimeToMinutes(settingsStorage.getTimeToOn1());
         uint16_t timeToOff = Clock::stringTimeToMinutes(settingsStorage.getTimeToOff1());
@@ -73,13 +73,13 @@ void lampOnOrOffIfNeed()
 
     if ((settingsStorage.getTimeToOn1() != String(""))
         && (settingsStorage.getTimeToOff1() != String(""))
-        && (settingsStorage.getTimeToOff2() != String(""))
+        && (settingsStorage.getTimeToOn2() != String(""))
         && (settingsStorage.getTimeToOff2() != String(""))) {
         uint16_t timeToOn1 = Clock::stringTimeToMinutes(settingsStorage.getTimeToOn1());
         uint16_t timeToOff1 = Clock::stringTimeToMinutes(settingsStorage.getTimeToOff1());
         uint16_t timeToOn2 = Clock::stringTimeToMinutes(settingsStorage.getTimeToOn2());
         uint16_t timeToOff2 = Clock::stringTimeToMinutes(settingsStorage.getTimeToOff2());
-        if (((currentTime < timeToOn1) && (currentTime < timeToOn2)) || ((currentTime >= timeToOff1) && (currentTime >= timeToOff2))) {
+        if (((currentTime < timeToOn1) || (currentTime > timeToOff1)) && ((currentTime < timeToOn2) || (currentTime > timeToOff2))) {
             if (lamp.isOn()) {
                 lamp.off();
             }
