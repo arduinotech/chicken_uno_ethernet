@@ -35,6 +35,12 @@ uint8_t Clock::getCurrentHour()
     return now.hour();
 }
 
+uint8_t Clock::getCurrentMinute()
+{
+    DateTime now = _rtc.now();
+    return now.minute();
+}
+
 String Clock::unixTimeToString(uint32_t unixtime)
 {
     return dateTimeToString(DateTime(unixtime));

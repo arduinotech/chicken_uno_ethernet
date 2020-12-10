@@ -21,6 +21,8 @@ SettingsStorage settingsStorage;
 LogEvent logEvents[LOG_SIZE];
 uint8_t logEventsCount = 0;
 
+uint16_t indicatorInterval = WORK_INDICATOR_INTERVAL_NORMAL;
+
 void lampOnOrOffIfNeed()
 {
     if (settingsStorage.getManual()) {
@@ -219,6 +221,7 @@ void loop()
     static uint8_t lastHourSaveData = 1;
     static bool workIndicatorState = true;
     static uint32_t workIndicatorLastChangeTime = 0;
+    static uint32_t workIndicatorLastChangeIntervalToNormalRequest = 0;
 
     if (lampOnOffIfNeedLastCall > now) {
         lampOnOffIfNeedLastCall = 0;
@@ -228,7 +231,11 @@ void loop()
         workIndicatorLastChangeTime = 0;
     }
 
-    if (now > (workIndicatorLastChangeTime + WORK_INDICATOR_INTERVAL)) {
+    if (workIndicatorLastChangeIntervalToNormalRequest > now) {
+        workIndicatorLastChangeIntervalToNormalRequest = 0;
+    }
+
+    if (now > (workIndicatorLastChangeTime + indicatorInterval)) {
         workIndicatorState = !workIndicatorState;
         if (workIndicatorState) {
             digitalWrite(WORK_INDICATOR_PIN, HIGH);
@@ -256,6 +263,21 @@ void loop()
         }
     }
 
-    webServer.listening();
+    uint8_t requestType = webServer.listening();
+    if (NO_REQUEST == requestType) {
+        if ((WORK_INDICATOR_INTERVAL_REQUEST == indicatorInterval)
+        && ((now - workIndicatorLastChangeIntervalToNormalRequest) > SHOW_NORMAL_REQUEST_TYPE_ON_INDICATOR)) {
+            indicatorInterval = WORK_INDICATOR_INTERVAL_NORMAL;
+            workIndicatorLastChangeIntervalToNormalRequest = 0;
+        }
+    } else if (NORMAL_REQUEST == requestType) {
+        if (WORK_INDICATOR_INTERVAL_NORMAL == indicatorInterval) {
+            indicatorInterval = WORK_INDICATOR_INTERVAL_REQUEST;
+            workIndicatorLastChangeIntervalToNormalRequest = now;
+        }
+    } else if (BAD_REQUEST == requestType) {
+        indicatorInterval = WORK_INDICATOR_INTERVAL_BAD_REQUEST;
+    }
+
     Watchdog.reset();
 }

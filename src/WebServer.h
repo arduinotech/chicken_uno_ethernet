@@ -4,6 +4,10 @@
 #include <Arduino.h>
 #include <Ethernet.h>
 
+#define NO_REQUEST 0
+#define NORMAL_REQUEST 1
+#define BAD_REQUEST 2
+
 struct LogEvent {
     uint32_t unixtime;
     int8_t temp;
@@ -34,7 +38,7 @@ class WebServer
     public:
         WebServer(uint16_t port);
         void init(uint8_t *mac_address, IPAddress local_ip, ProcessorFunctionType processorFunction);
-        void listening();
+        uint8_t listening();
 
     private:
         EthernetServer *_server;

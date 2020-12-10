@@ -17,7 +17,7 @@ void WebServer::init(uint8_t *mac_address, IPAddress local_ip, ProcessorFunction
     _processorFunction = processorFunction;
 }
 
-void WebServer::listening()
+uint8_t WebServer::listening()
 {
     EthernetClient client = _server->available();
     if (client) {
@@ -35,7 +35,13 @@ void WebServer::listening()
                 }
                 if (c == '\n' && currentLineIsBlank) {
                     if (_url == String("")) {
-                        return;
+                        _request = "";
+                        _url = "";
+                        delay(1);
+
+                        // Тут не было вызовы stop() - могло падать из-за переполнения сокетов
+                        client.stop();
+                        return BAD_REQUEST;
                     }
 
                     HtmlParams htmlParams = _processorFunction(_url);
@@ -138,7 +144,9 @@ void WebServer::listening()
         _url = "";
         delay(1);
         client.stop();
+        return NORMAL_REQUEST;
     }
+    return NO_REQUEST;
 }
 
 String WebServer::parseUrlFromRequest()
