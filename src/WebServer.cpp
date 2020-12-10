@@ -22,6 +22,7 @@ uint8_t WebServer::listening()
     EthernetClient client = _server->available();
     if (client) {
         bool currentLineIsBlank = true;
+        uint16_t clientConnectedCounter = 0;
         while (client.connected()) {
             if (client.available()) {
                 char c = client.read();
@@ -138,6 +139,11 @@ uint8_t WebServer::listening()
                 } else if (c != '\r') {
                     currentLineIsBlank = false;
                 }
+            }
+
+            // Защитимся от бесконечного цикла
+            if (++clientConnectedCounter > 50000) {
+                break;
             }
         }
         _request = "";
