@@ -18,12 +18,12 @@ bool Lamp::isOn()
 
 void Lamp::on()
 {
-    digitalWrite(_pin, HIGH);
+    digitalWrite(_pin, LOW);
     _curState = true;
 }
 
 void Lamp::off()
 {
-    digitalWrite(_pin, LOW);
+    digitalWrite(_pin, HIGH);
     _curState = false;
 }
